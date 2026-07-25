@@ -12,8 +12,7 @@ st.set_page_config(page_title="WISDOM Portfolio Manager")
 
 st.title("WISDOM Portfolio Manager")
 st.caption(
-    "Advisory only. Every recommendation below requires human review before "
-    "it is acted on - nothing in this app places trades."
+    "Every recommendation below requires human review before any action is taken !!"
 )
 
 try:
@@ -191,10 +190,6 @@ else:
 st.subheader("Quant scorecard")
 quant_score = result["quant_score"]
 if quant_score.get("checks"):
-    # "threshold" mixes floats (e.g. 0.15) and strings (e.g. "> 0" for the free
-    # cash flow check) - pyarrow can't infer a single column type from that, so
-    # stringify it here just for display. The raw numeric values are untouched
-    # everywhere else (agent prompts, JSON, etc).
     display_checks = [{**c, "threshold": str(c["threshold"])} for c in quant_score["checks"]]
     st.dataframe(display_checks, width="stretch")
     st.caption(quant_score["capital_allocation_note"])
@@ -236,4 +231,4 @@ if result["open_questions"]:
     for question in result["open_questions"]:
         st.write(f"- {question}")
 
-st.info("This recommendation requires human review before any action is taken.")
+# st.info("This recommendation requires human review before any action is taken.")
