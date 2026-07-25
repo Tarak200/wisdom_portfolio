@@ -20,11 +20,11 @@ See [architecture.md](architecture.md) for the full system design and
 ```powershell
 # from the repo root
 uv sync                      # installs everything from pyproject.toml / uv.lock
-# or, without uv:
-pip install -r requirements.txt
 
-copy .env.example .env       # then fill in your API key(s) in .env
-```
+# then fill in your API key(s) in .env
+```powershell
+copy .env.example .env     
+
 
 `inputs/` must contain the research PDFs and trade log this app reads:
 
@@ -51,28 +51,15 @@ streamlit run app.py
 
 This starts the Streamlit UI at `http://localhost:8501`. From there you can:
 
-- **Single stock (Agent 1):** pick one of the four companies and run its
+- **Single stock:** pick one of the four companies and run its
   individual buy/hold/sell analysis (fundamentals, quant scorecard, business
   quality, valuation check, grounding/hallucination check).
-- **Full portfolio (Agent 2):** run Agent 1 on all four stocks, then the
+- **Full portfolio:** run Agent 1 on all four stocks, then the
   orchestrator, to get relative sizing guidance across the whole portfolio.
 
 The first run for a company builds a local FAISS vector index from its
 research PDF (`outputs/vector_store/`) - this can take a few seconds the first
 time and is cached afterwards.
-
-## Running without the UI
-
-Both agents are plain Python functions and can be called directly, e.g. for
-scripting or testing:
-
-```python
-from agent import run_analysis
-from orchestrator import run_portfolio_review
-
-result = run_analysis("amber")           # Agent 1, one stock
-portfolio = run_portfolio_review()       # Agent 2, all stocks
-```
 
 ## Configuration
 
@@ -91,13 +78,3 @@ Free-tier LLM APIs have small per-minute/per-day token budgets. If every model
 in the chain fails, the error message lists exactly which provider/model
 failed and why (rate limit, invalid model slug, etc.) - check that message
 first before assuming the app itself is broken.
-
-## Deploying to Streamlit Community Cloud
-
-`config.py` already reads secrets from `st.secrets` when there is no local
-`.env` file, so no code changes are needed. In the app's dashboard, add the
-same keys from `.env.example` under **Settings -> Secrets**, then point the
-deployment at `app.py`. Note that NSE's quote endpoint (`tools/fetch_nse.py`)
-frequently blocks requests from cloud/datacenter IP ranges - if NSE
-consistently fails only in the cloud deployment (and works locally), that is a
-known limitation of the free public endpoint, not a bug in this app.

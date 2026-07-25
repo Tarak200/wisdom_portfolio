@@ -21,9 +21,9 @@ except Exception as exc:
     st.error(f"Could not read outputs/trade_metrics.xlsx: {exc}")
     st.stop()
 
-view = st.radio("View", ["Single stock (Agent 1)", "Full portfolio (Agent 2 - all 4 stocks)"], horizontal=True)
+view = st.radio("View", ["Single stock", "Full portfolio"], horizontal=True)
 
-if view == "Full portfolio (Agent 2 - all 4 stocks)":
+if view == "Full portfolio (all 4 stocks)":
     if st.button("Run portfolio review", type="primary"):
         with st.spinner("Running Agent 1 on all 4 stocks, then the orchestrator..."):
             try:
