@@ -191,7 +191,12 @@ else:
 st.subheader("Quant scorecard")
 quant_score = result["quant_score"]
 if quant_score.get("checks"):
-    st.dataframe(quant_score["checks"], use_container_width=True)
+    # "threshold" mixes floats (e.g. 0.15) and strings (e.g. "> 0" for the free
+    # cash flow check) - pyarrow can't infer a single column type from that, so
+    # stringify it here just for display. The raw numeric values are untouched
+    # everywhere else (agent prompts, JSON, etc).
+    display_checks = [{**c, "threshold": str(c["threshold"])} for c in quant_score["checks"]]
+    st.dataframe(display_checks, width="stretch")
     st.caption(quant_score["capital_allocation_note"])
 else:
     st.caption(quant_score.get("note", "No quant checks available."))
@@ -222,7 +227,7 @@ if not result["hallucination_check_passed"]:
     st.warning("Still above the hallucination threshold after all regeneration attempts - treat this analysis with extra caution.")
 
 if result["claims_checked"]:
-    st.dataframe(result["claims_checked"], use_container_width=True)
+    st.dataframe(result["claims_checked"], width="stretch")
 else:
     st.caption("No claims were cited to check.")
 
