@@ -78,6 +78,29 @@ recommendation actually depends on, not every sentence.
 """
 
 
+# Fields that are useful for the Streamlit UI (app.py) but add nothing to the
+# LLM's judgment - document links and BSE's raw API response are the two
+# biggest offenders, together adding roughly 1,500 tokens of noise per call.
+# Free-tier models have small per-minute token budgets (e.g. Groq's
+# llama-3.1-8b-instant caps at 6000 TPM), so trimming these before the prompt
+# is built is what keeps the primary model in the fallback chain usable
+# instead of failing on request size on every single call.
+PROMPT_EXCLUDED_SCREENER_FIELDS = {"documents"}
+PROMPT_EXCLUDED_BSE_FIELDS = {"raw"}
+
+
+def _fundamentals_for_prompt(fundamentals: dict) -> dict:
+    """Same data as `fundamentals`, minus fields the LLM doesn't need to judge
+    business quality. The full dict (with documents/raw) is still returned to
+    the caller and shown in the UI - only the prompt copy is trimmed."""
+    trimmed = dict(fundamentals)
+    if isinstance(trimmed.get("screener"), dict):
+        trimmed["screener"] = {k: v for k, v in trimmed["screener"].items() if k not in PROMPT_EXCLUDED_SCREENER_FIELDS}
+    if isinstance(trimmed.get("bse"), dict):
+        trimmed["bse"] = {k: v for k, v in trimmed["bse"].items() if k not in PROMPT_EXCLUDED_BSE_FIELDS}
+    return trimmed
+
+
 def run_analysis(company: str) -> dict:
     documents = ingest_documents.ingest(company)
     metrics = trade_metrics.load_metrics(company)
@@ -106,7 +129,7 @@ def run_analysis(company: str) -> dict:
 
     hallucination_check_passed = hallucination["score"] <= HALLUCINATION_THRESHOLD
     recommendation, override_note = _apply_guardrail(
-        analysis.get("recommendation", "hold"),
+        _normalize_recommendation(analysis.get("recommendation")),
         analysis.get("red_flags", []),
         verified_claims,
         hallucination_check_passed,
@@ -152,6 +175,7 @@ def _generate_grounded_analysis(
     caller can see this via hallucination_check_passed being False."""
     regeneration_note = ""
     best = None  # (analysis, verified_claims, attempt_number, hallucination)
+    fundamentals_for_prompt = _fundamentals_for_prompt(fundamentals)
 
     for attempt in range(1, MAX_HALLUCINATION_REGENERATIONS + 2):
         prompt = ANALYSIS_PROMPT.format(
@@ -159,7 +183,7 @@ def _generate_grounded_analysis(
             company=company,
             holding_context=holding_context,
             report_text=documents["combined_text"],
-            fundamentals_json=json.dumps(fundamentals, indent=2, default=str),
+            fundamentals_json=json.dumps(fundamentals_for_prompt, indent=2, default=str),
             quant_score_json=json.dumps(quant_score, indent=2, default=str),
             trade_metrics_json=json.dumps(metrics, indent=2, default=str),
             regeneration_note=regeneration_note,
@@ -228,6 +252,16 @@ def _as_float(value) -> float | None:
         return float(value) if value is not None else None
     except (TypeError, ValueError):
         return None
+
+
+def _normalize_recommendation(value) -> str:
+    """The prompt asks for exactly 'buy'/'hold'/'sell', but a model can still
+    reply with different casing or an unexpected word - anything that isn't
+    one of the three known values is treated as 'hold' rather than passed
+    through, since downstream guardrail logic (agent.py, orchestrator.py)
+    keys off these exact strings."""
+    normalized = str(value).strip().lower() if value is not None else ""
+    return normalized if normalized in ("buy", "hold", "sell") else "hold"
 
 
 def _parse_json_object(raw_text: str) -> dict | None:

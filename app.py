@@ -8,7 +8,7 @@ from agent import run_analysis
 from orchestrator import run_portfolio_review
 from tools import trade_metrics
 
-st.set_page_config(page_title="WISDOM Portfolio Manager", page_icon="\U0001F4CA")
+st.set_page_config(page_title="WISDOM Portfolio Manager")
 
 st.title("WISDOM Portfolio Manager")
 st.caption(
@@ -152,14 +152,14 @@ else:
             st.write(f"**Promoter holding:** {screener['promoter_holding_pct']:.1%} (trend: {screener.get('promoter_holding_trend')})")
             if not screener.get("promoter_holding_period_verified", False):
                 st.caption(
-                    "⚠️ Latest-quarter column could not be independently confirmed from the table headers - "
+                    "Latest-quarter column could not be independently confirmed from the table headers - "
                     "verify manually on Screener.in before trusting this as the current figure."
                 )
         if fundamentals.get("debt_to_equity") is not None:
             st.write(f"**Debt/Equity:** {fundamentals['debt_to_equity']:.2f} ({fundamentals.get('debt_to_equity_source')})")
             if not fundamentals.get("debt_to_equity_period_verified", False):
                 st.caption(
-                    "⚠️ Balance sheet column order could not be independently confirmed as latest-period-last - "
+                    "Balance sheet column order could not be independently confirmed as latest-period-last - "
                     "verify manually on Screener.in before trusting this figure."
                 )
         else:
