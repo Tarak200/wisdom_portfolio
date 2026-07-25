@@ -23,7 +23,7 @@ except Exception as exc:
 
 view = st.radio("View", ["Single stock", "Full portfolio"], horizontal=True)
 
-if view == "Full portfolio (all 4 stocks)":
+if view == "Full portfolio":
     if st.button("Run portfolio review", type="primary"):
         with st.spinner("Running Agent 1 on all 4 stocks, then the orchestrator..."):
             try:
