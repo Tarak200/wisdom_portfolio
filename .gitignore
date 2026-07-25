@@ -13,10 +13,6 @@ wheels/
 .env
 .streamlit/secrets.toml
 
-# inputs
-inputs/
-outputs/
-
 # notebooks
 notebooks/
 
@@ -28,4 +24,4 @@ remaining_works.txt
 .env.example
 WRITEUP.md
 architecture_diagram.html
-
+misc/
