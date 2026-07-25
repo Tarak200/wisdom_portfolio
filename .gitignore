@@ -10,7 +10,7 @@ wheels/
 .venv
 
 # secrets
-.env_og
+.env
 .streamlit/secrets.toml
 
 # notebooks
