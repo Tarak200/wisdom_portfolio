@@ -5,8 +5,6 @@ An advisory buy/hold/sell assistant for a concentrated, long-term equity portfol
 LLM-based agents, and always requires human review before anything is acted on -
 nothing in this app places trades.
 
-See [architecture.md](architecture.md) for the full system design and
-[WRITEUP.md](WRITEUP.md) for the reasoning behind it (thresholds, LLM usage, guardrails).
 
 ## Prerequisites
 
@@ -20,11 +18,13 @@ See [architecture.md](architecture.md) for the full system design and
 ```powershell
 # from the repo root
 uv sync                      # installs everything from pyproject.toml / uv.lock
+```
 
 # then fill in your API key(s) in .env
+
 ```powershell
 copy .env.example .env     
-
+```
 
 `inputs/` must contain the research PDFs and trade log this app reads:
 
@@ -63,8 +63,7 @@ time and is cached afterwards.
 
 ## Configuration
 
-All configuration lives in `.env` (see `.env.example` for every variable and
-what it does):
+All configuration lives in `.env` which is not in github as it contains sensitive APIs (see `.env.example` for every variable and what it does):
 
 - `LLM_PRIMARY_MODEL` / `LLM_FALLBACK_MODEL_1-3` - the model fallback chain,
   tried in order. `provider/model_name`, provider is one of `groq`,
