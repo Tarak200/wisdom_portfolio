@@ -1,0 +1,15 @@
+streamlit>=1.60.0
+openai>=2.48.0
+python-dotenv>=1.2.2
+pypdf>=6.14.2
+polars>=1.43.0
+fastexcel>=0.20.2
+openpyxl>=3.1.5
+xlsxwriter>=3.2.9
+xlrd>=2.0.2
+yfinance>=0.2.66
+faiss-cpu
+fastembed
+numpy
+requests>=2.32.0
+beautifulsoup4>=4.12.3
